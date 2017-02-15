@@ -1,0 +1,37 @@
+*source*:
+http://wiki.bits.vib.be/index.php/Create_a_valid_gtf_file_for_tophat
+
+# 1. download a program called "genePredToGtf" from here:
+# http://hgdownload.cse.ucsc.edu/admin/exe/
+# place the correct version of the executable somewhere in your path
+ 
+# 2. Create the following file in your home directory:
+echo 'db.host=genome-mysql.cse.ucsc.edu
+db.user=genomep
+db.password=password' > ~/.hg.conf
+ 
+# the file's permissions must be user-only
+chmod 0600 ~/.hg.conf
+ 
+# 3. run "genePredToGtf" with any organism and any table that is in "genePred" format:
+## mm9/RefSeq Genes
+genePredToGtf mm9 refGene refGene.gtf
+ 
+## hg19/Ensemble Genes
+genePredToGtf hg19 ensGene ensGene.gtf
+ 
+## hg18/UCSC Known Genes
+genePredToGtf hg18 knownGene knownGene.gtf
+ 
+# This will save "refGene.gtf" with all the required attributes 
+# (gene_id, gene_name transcript_id, exon_number).
+# but still not directly usable with DESeq because of multiple isoforms per gene.
+
+To obtain the GFF version of the GTF data, use the 'gffread' utility (part of the Cufflinks package).
+Use 'gffread' once more to extract the corresponding transcripts from your genome fasta file.
+
+# create a GFF version of hg19_ensGene.gtf 
+gffread -E hg19_ensGene.gtf -o hg19_ensGene.gff
+ 
+# extract transcript sequences from the full genome based on the GTF information
+gffread -w hg19_refGene.fa -g hg19.fa hg19_refGene.gtf
